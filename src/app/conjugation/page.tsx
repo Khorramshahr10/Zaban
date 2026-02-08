@@ -1,22 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -24,16 +12,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Loader2, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Loader2, MoreVertical, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { ConjugationTable } from "./conjugation-table";
+import { ConjugationGrid } from "./conjugation-grid";
 import { useLanguage } from "@/components/language-provider";
+import { TargetText } from "@/components/target-text";
 
 interface Verb {
   id: number;
   infinitive: string;
   root: string | null;
   form: string | null;
+  meaning: string | null;
+  masdar: string | null;
+  masdarVoweled: string | null;
+  verbType: string | null;
   aiGenerated: boolean;
   createdAt: string;
 }
@@ -48,32 +57,35 @@ interface Conjugation {
   transliteration: string | null;
 }
 
-const arabicForms = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+const arabicForms = [
+  "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+];
+
+const hasTargetScript = (text: string) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
 
 export default function ConjugationPage() {
   const { activeLanguage } = useLanguage();
   const [verbs, setVerbs] = useState<Verb[]>([]);
-  const [selectedVerb, setSelectedVerb] = useState<number | null>(null);
+  const [selectedVerb, setSelectedVerb] = useState<Verb | null>(null);
   const [conjugations, setConjugations] = useState<Conjugation[]>([]);
-  const [showAdd, setShowAdd] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Form state
-  const [infinitive, setInfinitive] = useState("");
-  const [root, setRoot] = useState("");
-  const [form, setForm] = useState("");
+  const [inputVerb, setInputVerb] = useState("");
+  const [inputForm, setInputForm] = useState("");
+  const [verbToDelete, setVerbToDelete] = useState<Verb | null>(null);
 
-  const fetchVerbs = async () => {
+  const fetchVerbs = useCallback(async () => {
     const res = await fetch(`/api/conjugation?lang=${activeLanguage}`);
     const data = await res.json();
     setVerbs(data);
-  };
+  }, [activeLanguage]);
 
   const fetchConjugations = async (verbId: number) => {
     setLoading(true);
     const res = await fetch(`/api/conjugation/${verbId}`);
     const data = await res.json();
+    setSelectedVerb(data.verb);
     setConjugations(data.conjugations || []);
     setLoading(false);
   };
@@ -82,38 +94,29 @@ export default function ConjugationPage() {
     fetchVerbs();
     setSelectedVerb(null);
     setConjugations([]);
-  }, [activeLanguage]);
-
-  useEffect(() => {
-    if (selectedVerb) {
-      fetchConjugations(selectedVerb);
-    }
-  }, [selectedVerb]);
+  }, [fetchVerbs]);
 
   const handleGenerate = async () => {
-    if (!infinitive) return;
+    if (!inputVerb.trim()) return;
     setGenerating(true);
     try {
       const res = await fetch("/api/conjugation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          infinitive,
-          root: root || undefined,
-          form: form || undefined,
+          infinitive: inputVerb.trim(),
+          form: inputForm || undefined,
           languageCode: activeLanguage,
         }),
       });
-
       if (res.ok) {
         const data = await res.json();
         toast.success("Conjugation generated");
-        setShowAdd(false);
-        setInfinitive("");
-        setRoot("");
-        setForm("");
+        setInputVerb("");
+        setInputForm("");
         await fetchVerbs();
-        setSelectedVerb(data.verb.id);
+        setSelectedVerb(data.verb);
+        setConjugations(data.conjugations || []);
       } else {
         const err = await res.json();
         toast.error(err.error || "Generation failed");
@@ -131,7 +134,7 @@ export default function ConjugationPage() {
     });
     if (res.ok) {
       toast.success("Verb deleted");
-      if (selectedVerb === verbId) {
+      if (selectedVerb?.id === verbId) {
         setSelectedVerb(null);
         setConjugations([]);
       }
@@ -139,147 +142,277 @@ export default function ConjugationPage() {
     }
   };
 
+  const getKeyForm = (tense: string, person: string) =>
+    conjugations.find((c) => c.tense === tense && c.person === person);
+
+  const pastTenseId = activeLanguage === "ar" ? "past" : "past_simple";
+  const presentTenseId = activeLanguage === "ar" ? "present" : "present_simple";
+  const hePerson = activeLanguage === "ar" ? "3sm" : "3s";
+  const youPerson = activeLanguage === "ar" ? "2sm" : "2s";
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Conjugation</h1>
-        <Button size="sm" onClick={() => setShowAdd(true)}>
-          <Plus className="h-4 w-4 mr-1" />
-          Add Verb
-        </Button>
+      <div>
+        <h1 className="text-lg font-semibold">Conjugation</h1>
+        <p className="text-sm text-muted-foreground">
+          Generate and browse verb conjugation tables.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Verb list sidebar */}
-        <div className="space-y-2">
-          {verbs.length === 0 ? (
-            <p className="text-sm text-muted-foreground p-2">
-              No verbs yet. Add one to generate conjugations.
-            </p>
-          ) : (
-            verbs.map((verb) => (
-              <Card
-                key={verb.id}
-                className={`cursor-pointer transition-colors ${
-                  selectedVerb === verb.id
-                    ? "border-primary"
-                    : "hover:border-muted-foreground/30"
-                }`}
-                onClick={() => setSelectedVerb(verb.id)}
-              >
-                <CardHeader className="p-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base" dir="rtl">
-                      {verb.infinitive}
-                    </CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(verb.id);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </div>
-                  {(verb.root || verb.form) && (
-                    <CardDescription className="text-xs">
-                      {verb.root && `Root: ${verb.root}`}
-                      {verb.root && verb.form && " · "}
-                      {verb.form && `Form ${verb.form}`}
-                    </CardDescription>
-                  )}
-                </CardHeader>
-              </Card>
-            ))
+      {/* Input */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Input
+          dir="rtl"
+          value={inputVerb}
+          onChange={(e) => setInputVerb(e.target.value)}
+          placeholder="Enter verb (e.g. 'كَتَبَ', 'to write')"
+          className="flex-1 font-target text-lg"
+          onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+        />
+        <div className="flex gap-2">
+          {activeLanguage === "ar" && (
+            <Select value={inputForm} onValueChange={setInputForm}>
+              <SelectTrigger className="w-28">
+                <SelectValue placeholder="Form" />
+              </SelectTrigger>
+              <SelectContent>
+                {arabicForms.map((f) => (
+                  <SelectItem key={f} value={f}>
+                    Form {f}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-        </div>
-
-        {/* Conjugation table */}
-        <div className="md:col-span-3">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : selectedVerb && conjugations.length > 0 ? (
-            <ConjugationTable conjugations={conjugations} />
-          ) : selectedVerb ? (
-            <p className="text-muted-foreground text-center py-12">
-              No conjugations found for this verb.
-            </p>
-          ) : (
-            <p className="text-muted-foreground text-center py-12">
-              Select a verb to view its conjugation table.
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Add verb dialog */}
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Generate Conjugation</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Verb (infinitive) *</Label>
-              <Input
-                dir="rtl"
-                value={infinitive}
-                onChange={(e) => setInfinitive(e.target.value)}
-                placeholder="e.g. كَتَبَ"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Root letters</Label>
-              <Input
-                dir="rtl"
-                value={root}
-                onChange={(e) => setRoot(e.target.value)}
-                placeholder="e.g. ك ت ب"
-              />
-            </div>
-            {activeLanguage === "ar" && (
-              <div className="space-y-2">
-                <Label>Arabic Form</Label>
-                <Select onValueChange={setForm}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select form..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {arabicForms.map((f) => (
-                      <SelectItem key={f} value={f}>
-                        Form {f}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <Button
+            onClick={handleGenerate}
+            disabled={!inputVerb.trim() || generating}
+            className="flex-1 sm:flex-none"
+          >
+            {generating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Conjugate"
             )}
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAdd(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleGenerate}
-                disabled={!infinitive || generating}
-              >
-                {generating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  "Generate with AI"
-                )}
-              </Button>
+          </Button>
+        </div>
+      </div>
+
+      {/* Verb chips */}
+      {verbs.length > 0 && (
+        <div className="flex gap-1.5 flex-wrap">
+          {verbs.map((verb) => (
+            <Badge
+              key={verb.id}
+              variant={selectedVerb?.id === verb.id ? "default" : "secondary"}
+              className="group cursor-pointer gap-1.5 py-1 px-2.5 text-sm rounded-md"
+              onClick={() => fetchConjugations(verb.id)}
+            >
+              <span className={hasTargetScript(verb.infinitive) ? "font-target" : ""} dir={hasTargetScript(verb.infinitive) ? "rtl" : "ltr"}>
+                {verb.infinitive}
+              </span>
+              {verb.meaning && (
+                <span className="font-sans text-xs opacity-60">
+                  {verb.meaning}
+                </span>
+              )}
+              {verb.form && (
+                <span className="font-sans text-[10px] font-semibold opacity-50">
+                  {verb.form}
+                </span>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <button className="ml-0.5 opacity-0 group-hover:opacity-40 hover:!opacity-100 focus:opacity-100 transition-opacity">
+                    <MoreVertical className="h-3 w-3" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setVerbToDelete(verb);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!verbToDelete} onOpenChange={(open) => !open && setVerbToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete verb?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete{" "}
+              <strong className={hasTargetScript(verbToDelete?.infinitive || "") ? "font-target" : ""}>
+                {verbToDelete?.infinitive}
+              </strong>
+              {verbToDelete?.meaning && ` (${verbToDelete.meaning})`} and all its conjugations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (verbToDelete) {
+                  handleDelete(verbToDelete.id);
+                  setVerbToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Detail */}
+      {selectedVerb && !loading && (
+        <>
+          <Separator />
+
+          {/* Metadata row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-lg border bg-border overflow-hidden">
+            <div className="bg-card p-3">
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                Root
+              </p>
+              <TargetText className="text-2xl font-bold">
+                {selectedVerb.root || "—"}
+              </TargetText>
+            </div>
+            <div className="bg-card p-3">
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                Meaning
+              </p>
+              <p className="text-base font-semibold">
+                {selectedVerb.meaning || "—"}
+              </p>
+            </div>
+            <div className="bg-card p-3">
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                Type
+              </p>
+              <p className="text-sm">{selectedVerb.verbType || "—"}</p>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+
+          {/* Masdar */}
+          {(selectedVerb.masdar || selectedVerb.masdarVoweled) && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border p-3">
+              <div>
+                <p className="text-sm font-medium">Verbal Noun (Masdar)</p>
+                <p className="text-xs text-muted-foreground">
+                  The concept of the action itself
+                </p>
+              </div>
+              <TargetText className="text-3xl font-bold">
+                {selectedVerb.masdarVoweled || selectedVerb.masdar}
+              </TargetText>
+            </div>
+          )}
+
+          {/* Key forms */}
+          {conjugations.length > 0 && (
+            <div>
+              <p className="text-sm font-medium mb-2">Key Forms</p>
+              <div className="grid grid-cols-3 gap-px rounded-lg border bg-border overflow-hidden">
+                <KeyFormCell
+                  title="Past"
+                  forms={[
+                    { label: "1s", conj: getKeyForm(pastTenseId, "1s") },
+                    {
+                      label: "3s",
+                      conj:
+                        getKeyForm(pastTenseId, hePerson) ||
+                        getKeyForm(pastTenseId, "3s"),
+                    },
+                  ]}
+                />
+                <KeyFormCell
+                  title="Present"
+                  forms={[
+                    { label: "1s", conj: getKeyForm(presentTenseId, "1s") },
+                    {
+                      label: "3s",
+                      conj:
+                        getKeyForm(presentTenseId, hePerson) ||
+                        getKeyForm(presentTenseId, "3s"),
+                    },
+                  ]}
+                />
+                <KeyFormCell
+                  title="Imperative"
+                  forms={[
+                    {
+                      label: "2s",
+                      conj:
+                        getKeyForm("imperative", youPerson) ||
+                        getKeyForm("imperative", "2s"),
+                    },
+                  ]}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Full table */}
+          {conjugations.length > 0 && (
+            <div>
+              <p className="text-sm font-medium mb-2">Full Conjugation</p>
+              <ConjugationGrid conjugations={conjugations} />
+            </div>
+          )}
+        </>
+      )}
+
+      {!selectedVerb && !loading && verbs.length === 0 && (
+        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+          Enter a verb above to generate its conjugation table.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function KeyFormCell({
+  title,
+  forms,
+}: {
+  title: string;
+  forms: {
+    label: string;
+    conj: { conjugated: string; voweled: string | null } | undefined;
+  }[];
+}) {
+  return (
+    <div className="bg-card p-3 space-y-2">
+      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+        {title}
+      </p>
+      {forms.map((f, i) => (
+        <div key={i}>
+          <p className="text-[10px] text-muted-foreground">{f.label}</p>
+          <TargetText className="text-xl font-semibold leading-tight">
+            {f.conj?.voweled || f.conj?.conjugated || "—"}
+          </TargetText>
+        </div>
+      ))}
     </div>
   );
 }

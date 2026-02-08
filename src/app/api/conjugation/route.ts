@@ -70,6 +70,13 @@ export async function POST(request: NextRequest) {
     }
 
     const parsed = JSON.parse(jsonStr) as {
+      metadata?: {
+        root?: string;
+        meaning?: string;
+        masdar?: string;
+        masdarVoweled?: string;
+        verbType?: string;
+      };
       conjugations: {
         tense: string;
         person: string;
@@ -79,9 +86,16 @@ export async function POST(request: NextRequest) {
       }[];
     };
 
-    // Update verb with AI model info
+    // Update verb with AI model info and metadata
     db.update(schema.verbs)
-      .set({ aiModel: ai.name })
+      .set({
+        aiModel: ai.name,
+        root: parsed.metadata?.root || verb.root,
+        meaning: parsed.metadata?.meaning || null,
+        masdar: parsed.metadata?.masdar || null,
+        masdarVoweled: parsed.metadata?.masdarVoweled || null,
+        verbType: parsed.metadata?.verbType || null,
+      })
       .where(eq(schema.verbs.id, verb.id))
       .run();
 
@@ -102,14 +116,23 @@ export async function POST(request: NextRequest) {
     // Auto-create flashcards for conjugations
     createConjugationFlashcards(verb.id);
 
-    // Return verb with conjugations
+    // Re-fetch updated verb and conjugations
+    const updatedVerb = db
+      .select()
+      .from(schema.verbs)
+      .where(eq(schema.verbs.id, verb.id))
+      .get();
+
     const conjugations = db
       .select()
       .from(schema.conjugations)
       .where(eq(schema.conjugations.verbId, verb.id))
       .all();
 
-    return NextResponse.json({ verb, conjugations }, { status: 201 });
+    return NextResponse.json(
+      { verb: updatedVerb, conjugations },
+      { status: 201 }
+    );
   } catch (error) {
     return NextResponse.json(
       {

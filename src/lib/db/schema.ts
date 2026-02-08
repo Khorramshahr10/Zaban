@@ -38,6 +38,10 @@ export const verbs = sqliteTable("verbs", {
   infinitive: text("infinitive").notNull(),
   root: text("root"),
   form: text("form"),
+  meaning: text("meaning"),
+  masdar: text("masdar"),
+  masdarVoweled: text("masdar_voweled"),
+  verbType: text("verb_type"),
   aiGenerated: integer("ai_generated", { mode: "boolean" })
     .notNull()
     .default(false),

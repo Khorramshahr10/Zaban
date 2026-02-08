@@ -77,7 +77,7 @@ export function ReferenceMode() {
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Arabic</p>
-              <TargetText className="text-2xl font-bold">
+              <TargetText className="text-3xl font-bold">
                 {result.translation}
               </TargetText>
             </div>

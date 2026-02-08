@@ -122,7 +122,7 @@ export default function VocabPage() {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.english}</TableCell>
                   <TableCell>
-                    <TargetText className="text-lg">{item.target}</TargetText>
+                    <TargetText className="text-xl">{item.target}</TargetText>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground">
                     {item.transliteration}

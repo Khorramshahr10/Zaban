@@ -4,7 +4,7 @@ export const arabicConfig: LanguageConfig = {
   code: "ar",
   name: "Arabic (MSA)",
   direction: "rtl",
-  fontFamily: "'Amiri', 'Noto Sans Arabic', serif",
+  fontFamily: "'IBM Plex Sans Arabic', 'Noto Sans Arabic', sans-serif",
   tenses: [
     { id: "past", label: "Past (الماضي)", labelNative: "الماضي" },
     { id: "present", label: "Present (المضارع)", labelNative: "المضارع" },

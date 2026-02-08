@@ -173,7 +173,7 @@ export default function ReviewPage() {
               <p className="text-sm text-muted-foreground uppercase tracking-wide">
                 Answer
               </p>
-              <TargetText className="text-3xl font-bold">
+              <TargetText className="text-4xl font-bold">
                 {currentCard.back}
               </TargetText>
             </div>
@@ -182,13 +182,13 @@ export default function ReviewPage() {
       </Card>
 
       {flipped && (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {qualityLabels.map(({ label, quality, color }) => (
             <Button
               key={quality}
               variant={color}
               onClick={() => handleReview(quality)}
-              className="w-full"
+              className="w-full h-12 sm:h-10"
             >
               {label}
             </Button>

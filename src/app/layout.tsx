@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Amiri } from "next/font/google";
+import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Sidebar, MobileNav } from "@/components/sidebar-nav";
@@ -19,10 +18,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const amiri = Amiri({
-  variable: "--font-target",
+const plexArabic = IBM_Plex_Sans_Arabic({
+  variable: "--font-arabic",
   subsets: ["arabic"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -38,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${amiri.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${plexArabic.variable} antialiased`}
       >
         <ThemeProvider>
           <LanguageProvider>
