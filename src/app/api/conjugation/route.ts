@@ -9,12 +9,15 @@ import { createConjugationFlashcards } from "@/lib/flashcards/create";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   seedDefaults();
+
+  const lang = request.nextUrl.searchParams.get("lang") || "ar";
 
   const verbList = db
     .select()
     .from(schema.verbs)
+    .where(eq(schema.verbs.languageCode, lang))
     .orderBy(desc(schema.verbs.createdAt))
     .all();
 

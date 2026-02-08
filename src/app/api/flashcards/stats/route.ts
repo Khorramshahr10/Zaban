@@ -1,10 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
-import { sql, lte, gte } from "drizzle-orm";
+import { sql, lte, gte, eq, and } from "drizzle-orm";
+import { seedDefaults } from "@/lib/db/seed";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  seedDefaults();
+
+  const lang = request.nextUrl.searchParams.get("lang") || "ar";
   const now = new Date().toISOString();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -13,12 +17,18 @@ export async function GET() {
   const totalCards = db
     .select({ count: sql<number>`count(*)` })
     .from(schema.flashcards)
+    .where(eq(schema.flashcards.languageCode, lang))
     .get();
 
   const dueCards = db
     .select({ count: sql<number>`count(*)` })
     .from(schema.flashcards)
-    .where(lte(schema.flashcards.nextReview, now))
+    .where(
+      and(
+        eq(schema.flashcards.languageCode, lang),
+        lte(schema.flashcards.nextReview, now)
+      )
+    )
     .get();
 
   const reviewedToday = db
@@ -30,11 +40,13 @@ export async function GET() {
   const totalVocab = db
     .select({ count: sql<number>`count(*)` })
     .from(schema.vocab)
+    .where(eq(schema.vocab.languageCode, lang))
     .get();
 
   const totalVerbs = db
     .select({ count: sql<number>`count(*)` })
     .from(schema.verbs)
+    .where(eq(schema.verbs.languageCode, lang))
     .get();
 
   return NextResponse.json({

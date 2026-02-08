@@ -1,22 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
-import { lte, asc, eq } from "drizzle-orm";
+import { lte, asc, eq, and } from "drizzle-orm";
 import { seedDefaults } from "@/lib/db/seed";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   seedDefaults();
 
+  const lang = request.nextUrl.searchParams.get("lang") || "ar";
   const now = new Date().toISOString();
 
-  // Get due cards: nextReview <= now
-  // Priority: failed cards first (repetitions = 0 and interval > 0 means it was reset),
-  // then lowest ease factor, then oldest due date
+  const langFilter = eq(schema.flashcards.languageCode, lang);
+
+  // Get due cards: nextReview <= now, filtered by language
   const dueCards = db
     .select()
     .from(schema.flashcards)
-    .where(lte(schema.flashcards.nextReview, now))
+    .where(and(langFilter, lte(schema.flashcards.nextReview, now)))
     .orderBy(
       asc(schema.flashcards.repetitions),
       asc(schema.flashcards.easeFactor),
@@ -24,10 +25,11 @@ export async function GET() {
     )
     .all();
 
-  // Get total count for stats
+  // Get total count for this language
   const allCards = db
     .select()
     .from(schema.flashcards)
+    .where(langFilter)
     .all();
 
   return NextResponse.json({

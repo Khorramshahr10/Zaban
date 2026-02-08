@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { TargetText } from "@/components/target-text";
 import { qualityLabels } from "@/lib/srs/sm2";
 import { RotateCcw, CheckCircle2 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface FlashcardData {
   id: number;
@@ -26,6 +27,7 @@ interface SessionStats {
 }
 
 export default function ReviewPage() {
+  const { activeLanguage } = useLanguage();
   const [cards, setCards] = useState<FlashcardData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -40,7 +42,7 @@ export default function ReviewPage() {
 
   const fetchCards = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/flashcards");
+    const res = await fetch(`/api/flashcards?lang=${activeLanguage}`);
     const data = await res.json();
     setCards(data.due || []);
     setStats((prev) => ({ ...prev, total: data.dueCount || 0 }));
@@ -52,7 +54,7 @@ export default function ReviewPage() {
 
   useEffect(() => {
     fetchCards();
-  }, [fetchCards]);
+  }, [fetchCards, activeLanguage]);
 
   const currentCard = cards[currentIndex];
 

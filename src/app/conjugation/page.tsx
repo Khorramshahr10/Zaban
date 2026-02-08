@@ -27,6 +27,7 @@ import {
 import { Plus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConjugationTable } from "./conjugation-table";
+import { useLanguage } from "@/components/language-provider";
 
 interface Verb {
   id: number;
@@ -50,6 +51,7 @@ interface Conjugation {
 const arabicForms = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 export default function ConjugationPage() {
+  const { activeLanguage } = useLanguage();
   const [verbs, setVerbs] = useState<Verb[]>([]);
   const [selectedVerb, setSelectedVerb] = useState<number | null>(null);
   const [conjugations, setConjugations] = useState<Conjugation[]>([]);
@@ -63,7 +65,7 @@ export default function ConjugationPage() {
   const [form, setForm] = useState("");
 
   const fetchVerbs = async () => {
-    const res = await fetch("/api/conjugation");
+    const res = await fetch(`/api/conjugation?lang=${activeLanguage}`);
     const data = await res.json();
     setVerbs(data);
   };
@@ -78,7 +80,9 @@ export default function ConjugationPage() {
 
   useEffect(() => {
     fetchVerbs();
-  }, []);
+    setSelectedVerb(null);
+    setConjugations([]);
+  }, [activeLanguage]);
 
   useEffect(() => {
     if (selectedVerb) {
@@ -97,6 +101,7 @@ export default function ConjugationPage() {
           infinitive,
           root: root || undefined,
           form: form || undefined,
+          languageCode: activeLanguage,
         }),
       });
 
@@ -237,21 +242,23 @@ export default function ConjugationPage() {
                 placeholder="e.g. ك ت ب"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Arabic Form</Label>
-              <Select onValueChange={setForm}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select form..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {arabicForms.map((f) => (
-                    <SelectItem key={f} value={f}>
-                      Form {f}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {activeLanguage === "ar" && (
+              <div className="space-y-2">
+                <Label>Arabic Form</Label>
+                <Select onValueChange={setForm}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select form..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {arabicForms.map((f) => (
+                      <SelectItem key={f} value={f}>
+                        Form {f}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAdd(false)}>
                 Cancel

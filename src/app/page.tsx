@@ -15,6 +15,7 @@ import {
   GraduationCap,
   TrendingUp,
 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 interface Stats {
   totalCards: number;
@@ -25,20 +26,24 @@ interface Stats {
 }
 
 export default function DashboardPage() {
+  const { activeLanguage, languages } = useLanguage();
   const [stats, setStats] = useState<Stats | null>(null);
 
+  const langName =
+    languages.find((l) => l.code === activeLanguage)?.name || activeLanguage;
+
   useEffect(() => {
-    fetch("/api/flashcards/stats")
+    fetch(`/api/flashcards/stats?lang=${activeLanguage}`)
       .then((res) => res.json())
       .then(setStats);
-  }, []);
+  }, [activeLanguage]);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome to Zaban. Your language learning overview.
+          Learning {langName}. Switch languages in the header.
         </p>
       </div>
 

@@ -34,9 +34,10 @@ interface VocabImportProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  languageCode: string;
 }
 
-export function VocabImport({ open, onOpenChange, onSuccess }: VocabImportProps) {
+export function VocabImport({ open, onOpenChange, onSuccess, languageCode }: VocabImportProps) {
   const [rawText, setRawText] = useState("");
   const [parsedRows, setParsedRows] = useState<ImportRow[]>([]);
   const [step, setStep] = useState<"input" | "preview">("input");
@@ -77,7 +78,7 @@ export function VocabImport({ open, onOpenChange, onSuccess }: VocabImportProps)
       const res = await fetch("/api/vocab/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rows: parsedRows }),
+        body: JSON.stringify({ rows: parsedRows, languageCode }),
       });
       const data = await res.json();
       toast.success(`Imported ${data.imported} of ${data.total} words`);

@@ -90,6 +90,7 @@ export default function SettingsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ar">Arabic (MSA)</SelectItem>
+                <SelectItem value="fa">Farsi (Persian)</SelectItem>
               </SelectContent>
             </Select>
           </div>

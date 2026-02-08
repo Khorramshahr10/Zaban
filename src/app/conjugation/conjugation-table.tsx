@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TargetText } from "@/components/target-text";
-import { arabicConfig } from "@/lib/language/arabic";
+import { useLanguage } from "@/components/language-provider";
+import { getLanguageConfig } from "@/lib/language/config";
 
 interface Conjugation {
   id: number;
@@ -26,8 +27,10 @@ interface ConjugationTableProps {
 }
 
 export function ConjugationTable({ conjugations }: ConjugationTableProps) {
-  const tenses = arabicConfig.tenses;
-  const persons = arabicConfig.persons;
+  const { activeLanguage } = useLanguage();
+  const langConfig = getLanguageConfig(activeLanguage);
+  const tenses = langConfig.tenses;
+  const persons = langConfig.persons;
 
   // Group conjugations by tense
   const byTense: Record<string, Record<string, Conjugation>> = {};

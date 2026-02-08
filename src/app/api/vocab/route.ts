@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
-import { eq, desc, like, or } from "drizzle-orm";
+import { eq, desc, like, or, and } from "drizzle-orm";
 import { seedDefaults } from "@/lib/db/seed";
 import { createVocabFlashcard } from "@/lib/flashcards/create";
 
@@ -13,27 +13,26 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get("search");
   const lang = searchParams.get("lang") || "ar";
 
-  let query = db
-    .select()
-    .from(schema.vocab)
-    .where(eq(schema.vocab.languageCode, lang))
-    .orderBy(desc(schema.vocab.createdAt));
+  const langFilter = eq(schema.vocab.languageCode, lang);
 
-  if (search) {
-    query = db
-      .select()
-      .from(schema.vocab)
-      .where(
+  const condition = search
+    ? and(
+        langFilter,
         or(
           like(schema.vocab.english, `%${search}%`),
           like(schema.vocab.target, `%${search}%`),
           like(schema.vocab.transliteration, `%${search}%`)
         )
       )
-      .orderBy(desc(schema.vocab.createdAt));
-  }
+    : langFilter;
 
-  const results = query.all();
+  const results = db
+    .select()
+    .from(schema.vocab)
+    .where(condition)
+    .orderBy(desc(schema.vocab.createdAt))
+    .all();
+
   return NextResponse.json(results);
 }
 

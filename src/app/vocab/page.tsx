@@ -18,6 +18,7 @@ import { VocabForm } from "./vocab-form";
 import { VocabImport } from "./vocab-import";
 import { VocabEditDialog } from "./vocab-edit-dialog";
 import { toast } from "sonner";
+import { useLanguage } from "@/components/language-provider";
 
 interface VocabItem {
   id: number;
@@ -32,6 +33,7 @@ interface VocabItem {
 }
 
 export default function VocabPage() {
+  const { activeLanguage } = useLanguage();
   const [items, setItems] = useState<VocabItem[]>([]);
   const [search, setSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -40,11 +42,12 @@ export default function VocabPage() {
 
   const fetchVocab = useCallback(async () => {
     const params = new URLSearchParams();
+    params.set("lang", activeLanguage);
     if (search) params.set("search", search);
     const res = await fetch(`/api/vocab?${params}`);
     const data = await res.json();
     setItems(data);
-  }, [search]);
+  }, [search, activeLanguage]);
 
   useEffect(() => {
     fetchVocab();
@@ -161,12 +164,14 @@ export default function VocabPage() {
         open={showAddForm}
         onOpenChange={setShowAddForm}
         onSuccess={fetchVocab}
+        languageCode={activeLanguage}
       />
 
       <VocabImport
         open={showImport}
         onOpenChange={setShowImport}
         onSuccess={fetchVocab}
+        languageCode={activeLanguage}
       />
 
       {editItem && (

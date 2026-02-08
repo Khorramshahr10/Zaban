@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { TargetText } from "@/components/target-text";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/components/language-provider";
 
 interface Mistake {
   type: string;
@@ -26,6 +27,7 @@ interface ScoringResult {
 }
 
 export function PracticeMode() {
+  const { activeLanguage } = useLanguage();
   const [english, setEnglish] = useState("");
   const [attempt, setAttempt] = useState("");
   const [result, setResult] = useState<ScoringResult | null>(null);
@@ -40,7 +42,7 @@ export function PracticeMode() {
       const res = await fetch("/api/translate/practice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ english, attempt }),
+        body: JSON.stringify({ english, attempt, languageCode: activeLanguage }),
       });
 
       if (res.ok) {

@@ -23,6 +23,22 @@ export function seedDefaults() {
       .run();
   }
 
+  const farsiExists = db
+    .select()
+    .from(schema.languages)
+    .where(eq(schema.languages.code, "fa"))
+    .get();
+
+  if (!farsiExists) {
+    db.insert(schema.languages)
+      .values({
+        code: "fa",
+        name: "Farsi (Persian)",
+        direction: "rtl",
+      })
+      .run();
+  }
+
   const activeLang = db
     .select()
     .from(schema.settings)

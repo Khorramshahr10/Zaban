@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TargetText } from "@/components/target-text";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/components/language-provider";
 
 interface TranslationResult {
   translation: string;
@@ -15,6 +16,7 @@ interface TranslationResult {
 }
 
 export function ReferenceMode() {
+  const { activeLanguage } = useLanguage();
   const [text, setText] = useState("");
   const [result, setResult] = useState<TranslationResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,7 @@ export function ReferenceMode() {
       const res = await fetch("/api/translate/reference", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, languageCode: activeLanguage }),
       });
 
       if (res.ok) {

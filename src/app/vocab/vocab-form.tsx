@@ -50,9 +50,10 @@ interface VocabFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  languageCode: string;
 }
 
-export function VocabForm({ open, onOpenChange, onSuccess }: VocabFormProps) {
+export function VocabForm({ open, onOpenChange, onSuccess, languageCode }: VocabFormProps) {
   const {
     register,
     handleSubmit,
@@ -67,7 +68,7 @@ export function VocabForm({ open, onOpenChange, onSuccess }: VocabFormProps) {
     const res = await fetch("/api/vocab", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, languageCode }),
     });
 
     if (res.ok) {
