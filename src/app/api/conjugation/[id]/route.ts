@@ -55,8 +55,8 @@ export async function POST(
     const ai = createAIProvider();
     const { system, user } = buildConjugationPrompt(
       verb.infinitive,
-      verb.root || undefined,
-      verb.form || undefined,
+      verb.root ?? null,
+      verb.form ?? null,
       langConfig
     );
 
