@@ -390,7 +390,7 @@ export default function ConjugationPage() {
               <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                 Verbal Noun (Masdar)
               </p>
-              <TargetText className="text-2xl font-bold">
+              <TargetText className="text-lg sm:text-2xl font-bold">
                 {selectedVerb.masdarVoweled || selectedVerb.masdar || "—"}
               </TargetText>
             </div>
@@ -398,7 +398,7 @@ export default function ConjugationPage() {
               <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                 Root
               </p>
-              <TargetText className="text-2xl font-bold">
+              <TargetText className="text-lg sm:text-2xl font-bold">
                 {selectedVerb.root || "—"}
               </TargetText>
             </div>
@@ -406,7 +406,7 @@ export default function ConjugationPage() {
               <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                 Meaning
               </p>
-              <p className="text-base font-semibold">
+              <p className="text-sm sm:text-base font-semibold">
                 {selectedVerb.meaning || "—"}
               </p>
             </div>

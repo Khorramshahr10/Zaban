@@ -105,7 +105,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         {(stats?.dueCards ?? 0) > 0 && (
           <Link href="/flashcards/review">
             <Button size="lg">

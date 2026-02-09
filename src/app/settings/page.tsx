@@ -258,7 +258,7 @@ export default function SettingsPage() {
                   onDrop={handleDrop}
                   className="flex items-center gap-3 rounded-md border px-3 py-2 cursor-grab active:cursor-grabbing select-none"
                 >
-                  <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
                   <span className={`flex-1 text-sm ${isHidden ? "text-muted-foreground" : ""}`}>
                     {getColumnLabel(id)}
                   </span>
@@ -266,13 +266,13 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => toggleColumn(id)}
                     disabled={def.alwaysVisible}
-                    className="p-1 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed"
                     title={def.alwaysVisible ? "Always visible" : isHidden ? "Show column" : "Hide column"}
                   >
                     {isHidden ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      <EyeOff className="h-5 w-5 text-muted-foreground" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>

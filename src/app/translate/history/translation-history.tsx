@@ -89,7 +89,7 @@ export function TranslationHistory() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -122,7 +122,7 @@ export function TranslationHistory() {
                       {item.type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-medium max-w-[200px] truncate">
+                  <TableCell className="font-medium max-w-[120px] sm:max-w-[200px] truncate">
                     {item.sourceText}
                   </TableCell>
                   <TableCell>

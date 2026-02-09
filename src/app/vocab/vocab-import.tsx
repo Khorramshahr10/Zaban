@@ -166,7 +166,7 @@ export function VocabImport({ open, onOpenChange, onSuccess, languageCode }: Voc
             <p className="text-sm text-muted-foreground">
               Found {parsedRows.length} words to import:
             </p>
-            <div className="max-h-60 overflow-y-auto rounded-md border">
+            <div className="max-h-60 overflow-y-auto overflow-x-auto rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>

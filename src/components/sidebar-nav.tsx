@@ -77,7 +77,7 @@ export function MobileNav() {
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-56 p-4">
+      <SheetContent side="left" className="w-52 p-4">
         <div className="flex items-center gap-2 px-3 py-2 mb-4">
           <Languages className="h-6 w-6 text-primary" />
           <span className="text-lg font-semibold">Zaban</span>
