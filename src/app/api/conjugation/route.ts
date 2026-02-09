@@ -8,6 +8,7 @@ import { seedDefaults } from "@/lib/db/seed";
 import { createConjugationFlashcards } from "@/lib/flashcards/create";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function GET(request: NextRequest) {
   seedDefaults();

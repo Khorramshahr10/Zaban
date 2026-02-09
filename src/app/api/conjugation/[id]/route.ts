@@ -6,6 +6,8 @@ import { buildConjugationPrompt } from "@/lib/ai/prompts/conjugation";
 import { getLanguageConfig } from "@/lib/language/config";
 import { createConjugationFlashcards } from "@/lib/flashcards/create";
 
+export const maxDuration = 60;
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

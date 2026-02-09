@@ -6,6 +6,8 @@ import { buildVocabTranslatePrompt } from "@/lib/ai/prompts/vocab-translate";
 import { getLanguageConfig } from "@/lib/language/config";
 import { createVocabFlashcard } from "@/lib/flashcards/create";
 
+export const maxDuration = 60;
+
 const BATCH_SIZE = 20;
 const CONCURRENCY = 4;
 
