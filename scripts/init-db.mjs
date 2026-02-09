@@ -106,6 +106,20 @@ db.exec(`
   );
 `);
 
+// Add columns that may be missing on older databases
+function addColumnIfMissing(table, column, type) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+    console.log(`Added column ${table}.${column}`);
+  }
+}
+
+addColumnIfMissing("vocab", "plural1", "TEXT");
+addColumnIfMissing("vocab", "plural2", "TEXT");
+addColumnIfMissing("vocab", "muradif", "TEXT");
+addColumnIfMissing("vocab", "mudaad", "TEXT");
+
 // Seed defaults
 const hasArabic = db.prepare("SELECT 1 FROM languages WHERE code = 'ar'").get();
 if (!hasArabic) {
