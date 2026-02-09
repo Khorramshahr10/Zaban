@@ -10,6 +10,9 @@ export function createVocabFlashcard(vocabId: number) {
 
   if (!vocab) return;
 
+  // Skip flashcard creation for untranslated words
+  if (!vocab.target) return;
+
   // Check if flashcard already exists for this vocab
   const existing = db
     .select()

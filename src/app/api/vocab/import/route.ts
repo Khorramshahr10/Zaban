@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   const { rows, languageCode } = body as {
     rows: {
       english: string;
-      target: string;
+      target?: string;
       transliteration?: string;
       partOfSpeech?: string;
       tags?: string;
@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    if (!row.english || !row.target) {
-      errors.push({ row: i + 1, error: "Missing english or target" });
+    if (!row.english) {
+      errors.push({ row: i + 1, error: "Missing english" });
       continue;
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         .values({
           languageCode: lang,
           english: row.english.trim(),
-          target: row.target.trim(),
+          target: row.target?.trim() || "",
           transliteration: row.transliteration?.trim() || null,
           partOfSpeech: row.partOfSpeech?.trim() || null,
           tags: row.tags?.trim() || null,
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
         })
         .returning()
         .get();
+      // Guard in createVocabFlashcard skips empty targets
       createVocabFlashcard(result.id);
       imported++;
     } catch (e) {

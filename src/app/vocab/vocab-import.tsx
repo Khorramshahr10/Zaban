@@ -59,11 +59,11 @@ export function VocabImport({ open, onOpenChange, onSuccess, languageCode }: Voc
         tags: row.tags || "",
         notes: row.notes || "",
       }))
-      .filter((r) => r.english && r.target);
+      .filter((r) => r.english);
 
     if (rows.length === 0) {
       toast.error(
-        "No valid rows found. Ensure CSV has 'english' and 'target' columns."
+        "No valid rows found. Ensure CSV has an 'english' column."
       );
       return;
     }

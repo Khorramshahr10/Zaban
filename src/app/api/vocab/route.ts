@@ -40,8 +40,34 @@ export async function POST(request: NextRequest) {
   seedDefaults();
 
   const body = await request.json();
-  const { english, target, transliteration, partOfSpeech, tags, notes, languageCode } = body;
+  const { words, english, target, transliteration, partOfSpeech, tags, notes, languageCode } = body;
 
+  // Batch add: { words: string[], languageCode }
+  if (words && Array.isArray(words)) {
+    const lang = languageCode || "ar";
+    const results = [];
+
+    for (const word of words) {
+      const trimmed = word.trim();
+      if (!trimmed) continue;
+
+      const result = db
+        .insert(schema.vocab)
+        .values({
+          languageCode: lang,
+          english: trimmed,
+          target: "",
+        })
+        .returning()
+        .get();
+
+      results.push(result);
+    }
+
+    return NextResponse.json(results, { status: 201 });
+  }
+
+  // Single add (legacy): { english, target, ... }
   if (!english || !target) {
     return NextResponse.json(
       { error: "English and target fields are required" },
@@ -63,7 +89,7 @@ export async function POST(request: NextRequest) {
     .returning()
     .get();
 
-  // Auto-create flashcard
+  // Auto-create flashcard (guard in create.ts skips empty targets)
   createVocabFlashcard(result.id);
 
   return NextResponse.json(result, { status: 201 });

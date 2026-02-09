@@ -4,7 +4,7 @@ export const farsiConfig: LanguageConfig = {
   code: "fa",
   name: "Farsi (Persian)",
   direction: "rtl",
-  fontFamily: "'IBM Plex Sans Arabic', 'Noto Sans Arabic', sans-serif",
+  fontFamily: "'Noto Sans Arabic', sans-serif",
   tenses: [
     { id: "present_simple", label: "Present Simple (حال ساده)", labelNative: "حال ساده" },
     { id: "past_simple", label: "Past Simple (گذشته ساده)", labelNative: "گذشته ساده" },
