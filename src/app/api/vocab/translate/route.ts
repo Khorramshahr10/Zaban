@@ -65,6 +65,10 @@ export async function POST(request: NextRequest) {
     target: string;
     transliteration: string;
     partOfSpeech: string;
+    plural1?: string;
+    plural2?: string;
+    muradif?: string;
+    mudaad?: string;
   }[];
 
   try {
@@ -97,6 +101,10 @@ export async function POST(request: NextRequest) {
         target: t.target,
         transliteration: t.transliteration || null,
         partOfSpeech: t.partOfSpeech || null,
+        plural1: t.plural1 || null,
+        plural2: t.plural2 || null,
+        muradif: t.muradif || null,
+        mudaad: t.mudaad || null,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(schema.vocab.id, word.id))

@@ -26,4 +26,10 @@ export const farsiConfig: LanguageConfig = {
   ],
   grammarNotes:
     "Farsi verbs have a past stem and a present stem. Conjugation is formed by adding personal endings to these stems. The infinitive ends in ـَن (-an).",
+  vocabColumns: {
+    plural1: "Plural 1 (جمع ١)",
+    plural2: "Plural 2 (جمع ٢)",
+    muradif: "Synonyms (مترادف)",
+    mudaad: "Antonyms (متضاد)",
+  },
 };

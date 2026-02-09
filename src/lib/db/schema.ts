@@ -21,6 +21,10 @@ export const vocab = sqliteTable("vocab", {
   partOfSpeech: text("part_of_speech"),
   tags: text("tags"),
   notes: text("notes"),
+  plural1: text("plural1"),
+  plural2: text("plural2"),
+  muradif: text("muradif"),
+  mudaad: text("mudaad"),
   createdAt: text("created_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

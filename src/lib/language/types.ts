@@ -6,6 +6,12 @@ export interface LanguageConfig {
   tenses: TenseConfig[];
   persons: PersonConfig[];
   grammarNotes?: string;
+  vocabColumns?: {
+    plural1: string;
+    plural2: string;
+    muradif: string;
+    mudaad: string;
+  };
 }
 
 export interface TenseConfig {

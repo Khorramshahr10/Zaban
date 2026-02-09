@@ -17,6 +17,7 @@ import { Search, Upload, Trash2, RefreshCw, Languages, Loader2 } from "lucide-re
 import { VocabImport } from "./vocab-import";
 import { toast } from "sonner";
 import { useLanguage } from "@/components/language-provider";
+import { getLanguageConfig } from "@/lib/language/config";
 
 interface VocabItem {
   id: number;
@@ -27,11 +28,22 @@ interface VocabItem {
   partOfSpeech: string | null;
   tags: string | null;
   notes: string | null;
+  plural1: string | null;
+  plural2: string | null;
+  muradif: string | null;
+  mudaad: string | null;
   createdAt: string;
 }
 
 export default function VocabPage() {
   const { activeLanguage } = useLanguage();
+  const langConfig = getLanguageConfig(activeLanguage);
+  const colLabels = langConfig.vocabColumns ?? {
+    plural1: "Plural 1",
+    plural2: "Plural 2",
+    muradif: "Synonyms",
+    mudaad: "Antonyms",
+  };
   const [items, setItems] = useState<VocabItem[]>([]);
   const [search, setSearch] = useState("");
   const [showImport, setShowImport] = useState(false);
@@ -212,6 +224,18 @@ export default function VocabPage() {
               <TableHead className="hidden md:table-cell">
                 Part of Speech
               </TableHead>
+              <TableHead className="hidden lg:table-cell">
+                {colLabels.plural1}
+              </TableHead>
+              <TableHead className="hidden lg:table-cell">
+                {colLabels.plural2}
+              </TableHead>
+              <TableHead className="hidden xl:table-cell">
+                {colLabels.muradif}
+              </TableHead>
+              <TableHead className="hidden xl:table-cell">
+                {colLabels.mudaad}
+              </TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -219,7 +243,7 @@ export default function VocabPage() {
             {items.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={9}
                   className="text-center text-muted-foreground py-8"
                 >
                   No vocabulary items yet. Add some words to get started.
@@ -244,6 +268,30 @@ export default function VocabPage() {
                   <TableCell className="hidden md:table-cell">
                     {item.partOfSpeech && (
                       <Badge variant="secondary">{item.partOfSpeech}</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {item.plural1 && (
+                      <TargetText>{item.plural1}</TargetText>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {item.plural2 && (
+                      <TargetText>{item.plural2}</TargetText>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden xl:table-cell">
+                    {item.muradif && (
+                      <span className="text-green-700 dark:text-green-400">
+                        <TargetText>{item.muradif}</TargetText>
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden xl:table-cell">
+                    {item.mudaad && (
+                      <span className="text-red-700 dark:text-red-400">
+                        <TargetText>{item.mudaad}</TargetText>
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>

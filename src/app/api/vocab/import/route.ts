@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
       partOfSpeech?: string;
       tags?: string;
       notes?: string;
+      plural1?: string;
+      plural2?: string;
+      muradif?: string;
+      mudaad?: string;
     }[];
     languageCode?: string;
   };
@@ -44,6 +48,10 @@ export async function POST(request: NextRequest) {
           partOfSpeech: row.partOfSpeech?.trim() || null,
           tags: row.tags?.trim() || null,
           notes: row.notes?.trim() || null,
+          plural1: row.plural1?.trim() || null,
+          plural2: row.plural2?.trim() || null,
+          muradif: row.muradif?.trim() || null,
+          mudaad: row.mudaad?.trim() || null,
         })
         .returning()
         .get();

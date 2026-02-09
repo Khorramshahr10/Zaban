@@ -33,4 +33,10 @@ export const arabicConfig: LanguageConfig = {
   ],
   grammarNotes:
     "Arabic verbs are classified by form (I-X). Form I is the base form. Root letters are typically 3 consonants (trilateral).",
+  vocabColumns: {
+    plural1: "Jama' 1 (جمع ١)",
+    plural2: "Jama' 2 (جمع ٢)",
+    muradif: "Muradif (مرادف)",
+    mudaad: "Mudaad (مضاد)",
+  },
 };
