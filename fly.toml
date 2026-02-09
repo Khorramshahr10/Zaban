@@ -1,11 +1,20 @@
+# fly.toml app configuration file generated for zaban on 2026-02-08T18:30:08-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
 app = 'zaban'
-primary_region = 'ord'
+primary_region = 'iad'
 
 [build]
 
 [env]
-  NODE_ENV = 'production'
   DB_PATH = '/data/zaban.db'
+  NODE_ENV = 'production'
+
+[[mounts]]
+  source = 'zaban_data'
+  destination = '/data'
 
 [http_service]
   internal_port = 3000
@@ -14,11 +23,7 @@ primary_region = 'ord'
   auto_start_machines = true
   min_machines_running = 0
 
-[mounts]
-  source = 'zaban_data'
-  destination = '/data'
-
 [[vm]]
-  memory = '512mb'
+  memory = '256mb'
   cpu_kind = 'shared'
   cpus = 1
