@@ -119,6 +119,7 @@ addColumnIfMissing("vocab", "plural1", "TEXT");
 addColumnIfMissing("vocab", "plural2", "TEXT");
 addColumnIfMissing("vocab", "muradif", "TEXT");
 addColumnIfMissing("vocab", "mudaad", "TEXT");
+addColumnIfMissing("translations", "breakdown", "TEXT");
 
 // Seed defaults
 const hasArabic = db.prepare("SELECT 1 FROM languages WHERE code = 'ar'").get();
