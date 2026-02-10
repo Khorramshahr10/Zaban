@@ -8,9 +8,9 @@ import { TranslationHistory } from "./history/translation-history";
 export default function TranslatePage() {
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Translation</h1>
+      <h1 className="text-2xl font-bold no-print">Translation</h1>
       <Tabs defaultValue="reference">
-        <TabsList>
+        <TabsList className="no-print">
           <TabsTrigger value="reference">Reference</TabsTrigger>
           <TabsTrigger value="practice">Practice</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>

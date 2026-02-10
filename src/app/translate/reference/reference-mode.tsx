@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TargetText } from "@/components/target-text";
-import { Loader2, Bookmark, BookmarkCheck } from "lucide-react";
+import { Loader2, BookmarkCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/components/language-provider";
 
@@ -28,7 +28,27 @@ export function ReferenceMode() {
   const [result, setResult] = useState<TranslationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
+
+  const saveTranslation = async (sourceText: string, data: TranslationResult) => {
+    try {
+      const res = await fetch("/api/translations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "reference",
+          languageCode: activeLanguage,
+          sourceText,
+          translation: data.translation,
+          transliteration: data.transliteration || null,
+          notes: data.notes || null,
+          breakdown: data.breakdown ? JSON.stringify(data.breakdown) : null,
+        }),
+      });
+      if (res.ok) setSaved(true);
+    } catch {
+      // Silent fail — translation is still shown, just not persisted
+    }
+  };
 
   const handleTranslate = async () => {
     if (!text.trim()) return;
@@ -46,6 +66,7 @@ export function ReferenceMode() {
       if (res.ok) {
         const data = await res.json();
         setResult(data);
+        saveTranslation(text, data);
       } else {
         const err = await res.json();
         toast.error(err.error || "Translation failed");
@@ -54,36 +75,6 @@ export function ReferenceMode() {
       toast.error("Translation failed");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!result) return;
-    setSaving(true);
-    try {
-      const res = await fetch("/api/translations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "reference",
-          languageCode: activeLanguage,
-          sourceText: text,
-          translation: result.translation,
-          transliteration: result.transliteration || null,
-          notes: result.notes || null,
-          breakdown: result.breakdown ? JSON.stringify(result.breakdown) : null,
-        }),
-      });
-      if (res.ok) {
-        setSaved(true);
-        toast.success("Translation saved");
-      } else {
-        toast.error("Failed to save translation");
-      }
-    } catch {
-      toast.error("Failed to save translation");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -114,21 +105,12 @@ export function ReferenceMode() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Translation</CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSave}
-                disabled={saved || saving}
-                title={saved ? "Saved" : "Save translation"}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : saved ? (
-                  <BookmarkCheck className="h-4 w-4" />
-                ) : (
-                  <Bookmark className="h-4 w-4" />
-                )}
-              </Button>
+              {saved && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <BookmarkCheck className="h-3.5 w-3.5" />
+                  Saved
+                </span>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-4">

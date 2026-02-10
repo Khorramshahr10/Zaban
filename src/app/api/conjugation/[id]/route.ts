@@ -71,6 +71,7 @@ export async function POST(
 
     const parsed = JSON.parse(jsonStr) as {
       metadata?: {
+        infinitive?: string;
         root?: string;
         meaning?: string;
         masdar?: string;
@@ -86,9 +87,13 @@ export async function POST(
       }[];
     };
 
+    const hasTargetScript = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(verb.infinitive);
+    const aiInfinitive = parsed.metadata?.infinitive;
+
     db.update(schema.verbs)
       .set({
         aiModel: ai.name,
+        ...(!hasTargetScript && aiInfinitive ? { infinitive: aiInfinitive } : {}),
         root: parsed.metadata?.root || verb.root,
         meaning: parsed.metadata?.meaning || null,
         masdar: parsed.metadata?.masdar || null,

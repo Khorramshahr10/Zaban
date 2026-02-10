@@ -16,6 +16,7 @@ export function buildConjugationPrompt(
 Return a JSON object with this exact structure:
 {
   "metadata": {
+    "infinitive": "<the verb's dictionary form (past tense 3rd person masculine singular) in target script with full diacritics>",
     "root": "<root letters of the verb>",
     "meaning": "<English meaning, e.g. 'to study'>",
     "masdar": "<verbal noun / masdar without diacritics>",
