@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
-import { sql, lte, gte, eq, and } from "drizzle-orm";
+import { sql, lte, lt, gte, eq, and, or } from "drizzle-orm";
 import { seedDefaults } from "@/lib/db/seed";
 
 export const dynamic = "force-dynamic";
@@ -51,9 +51,24 @@ export async function GET(request: NextRequest) {
     .where(eq(schema.verbs.languageCode, lang))
     .get();
 
+  const weakCards = db
+    .select({ count: sql<number>`count(*)` })
+    .from(schema.flashcards)
+    .where(
+      and(
+        baseFilter,
+        or(
+          lt(schema.flashcards.easeFactor, 2.5),
+          eq(schema.flashcards.repetitions, 0)
+        )
+      )
+    )
+    .get();
+
   return NextResponse.json({
     totalCards: totalCards?.count || 0,
     dueCards: dueCards?.count || 0,
+    weakCount: weakCards?.count || 0,
     reviewedToday: reviewedToday?.count || 0,
     totalVocab: totalVocab?.count || 0,
     totalVerbs: totalVerbs?.count || 0,

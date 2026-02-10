@@ -14,12 +14,14 @@ import {
   Languages,
   GraduationCap,
   TrendingUp,
+  Crosshair,
 } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
 
 interface Stats {
   totalCards: number;
   dueCards: number;
+  weakCount: number;
   reviewedToday: number;
   totalVocab: number;
   totalVerbs: number;
@@ -91,26 +93,33 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Reviewed Today
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Weak Cards</CardTitle>
+            <Crosshair className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.reviewedToday ?? "—"}
+              {stats?.weakCount ?? "—"}
             </div>
-            <p className="text-xs text-muted-foreground">reviews completed</p>
+            <p className="text-xs text-muted-foreground">need extra practice</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-        {(stats?.dueCards ?? 0) > 0 && (
+        {(stats?.totalCards ?? 0) > 0 && (
           <Link href="/flashcards/review">
             <Button size="lg">
               <GraduationCap className="h-4 w-4 mr-2" />
-              Start Review ({stats?.dueCards} cards)
+              Start Review
+              {(stats?.dueCards ?? 0) > 0 && ` (${stats?.dueCards} due)`}
+            </Button>
+          </Link>
+        )}
+        {(stats?.weakCount ?? 0) > 0 && (
+          <Link href="/flashcards/review">
+            <Button variant="outline" size="lg">
+              <Crosshair className="h-4 w-4 mr-2" />
+              Drill Weakest ({stats?.weakCount})
             </Button>
           </Link>
         )}

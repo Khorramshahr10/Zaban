@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { TargetText } from "@/components/target-text";
 import { qualityLabels } from "@/lib/srs/sm2";
-import { RotateCcw, CheckCircle2, BookOpen, Languages, Layers } from "lucide-react";
+import { RotateCcw, CheckCircle2, BookOpen, Languages, Layers, Crosshair } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
 
 interface FlashcardData {
@@ -26,6 +26,8 @@ interface SessionStats {
   incorrect: number;
 }
 
+type ReviewMode = "all" | "vocab" | "conjugation" | "weakest";
+
 export default function ReviewPage() {
   const { activeLanguage } = useLanguage();
   const [cards, setCards] = useState<FlashcardData[]>([]);
@@ -33,7 +35,8 @@ export default function ReviewPage() {
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sessionDone, setSessionDone] = useState(false);
-  const [cardTypeFilter, setCardTypeFilter] = useState<"all" | "vocab" | "conjugation">("all");
+  const [reviewMode, setReviewMode] = useState<ReviewMode>("all");
+  const [dueCount, setDueCount] = useState(0);
   const [stats, setStats] = useState<SessionStats>({
     total: 0,
     reviewed: 0,
@@ -44,16 +47,22 @@ export default function ReviewPage() {
   const fetchCards = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams({ lang: activeLanguage });
-    if (cardTypeFilter !== "all") params.set("cardType", cardTypeFilter);
+    if (reviewMode === "vocab" || reviewMode === "conjugation") {
+      params.set("cardType", reviewMode);
+    }
+    if (reviewMode === "weakest") {
+      params.set("mode", "weakest");
+    }
     const res = await fetch(`/api/flashcards?${params}`);
     const data = await res.json();
-    setCards(data.due || []);
-    setStats((prev) => ({ ...prev, total: data.dueCount || 0 }));
+    setCards(data.cards || []);
+    setDueCount(data.dueCount || 0);
+    setStats((prev) => ({ ...prev, total: data.totalCards || 0 }));
     setCurrentIndex(0);
     setFlipped(false);
     setSessionDone(false);
     setLoading(false);
-  }, [activeLanguage, cardTypeFilter]);
+  }, [activeLanguage, reviewMode]);
 
   useEffect(() => {
     fetchCards();
@@ -85,23 +94,34 @@ export default function ReviewPage() {
     }
   };
 
+  const poolLabel =
+    reviewMode === "weakest"
+      ? `${cards.length} weakest`
+      : `${dueCount} due`;
+
   const filterButtons = (
-    <div className="flex justify-center gap-1">
-      {([
-        { value: "all", label: "All", icon: Layers },
-        { value: "vocab", label: "Vocab", icon: BookOpen },
-        { value: "conjugation", label: "Conjugation", icon: Languages },
-      ] as const).map(({ value, label, icon: Icon }) => (
-        <Button
-          key={value}
-          variant={cardTypeFilter === value ? "default" : "outline"}
-          size="sm"
-          onClick={() => setCardTypeFilter(value)}
-        >
-          <Icon className="h-4 w-4 mr-1" />
-          {label}
-        </Button>
-      ))}
+    <div className="flex flex-col items-center gap-2">
+      <div className="flex justify-center gap-1">
+        {([
+          { value: "all", label: "All", icon: Layers },
+          { value: "vocab", label: "Vocab", icon: BookOpen },
+          { value: "conjugation", label: "Conjugation", icon: Languages },
+          { value: "weakest", label: "Weakest", icon: Crosshair },
+        ] as const).map(({ value, label, icon: Icon }) => (
+          <Button
+            key={value}
+            variant={reviewMode === value ? "default" : "outline"}
+            size="sm"
+            onClick={() => setReviewMode(value)}
+          >
+            <Icon className="h-4 w-4 mr-1" />
+            {label}
+          </Button>
+        ))}
+      </div>
+      {!loading && cards.length > 0 && (
+        <p className="text-xs text-muted-foreground">{poolLabel}</p>
+      )}
     </div>
   );
 
@@ -122,11 +142,13 @@ export default function ReviewPage() {
         {filterButtons}
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <CheckCircle2 className="h-12 w-12 text-green-500" />
-          <h2 className="text-xl font-semibold">No cards due!</h2>
+          <h2 className="text-xl font-semibold">
+            {reviewMode === "weakest" ? "No weak cards!" : "No flashcards yet"}
+          </h2>
           <p className="text-muted-foreground">
-            {cardTypeFilter === "all"
-              ? "Add vocabulary or conjugations to create flashcards."
-              : `No ${cardTypeFilter} cards due for review.`}
+            {reviewMode === "weakest"
+              ? "All your cards are at or above default ease. Nice work!"
+              : "Add vocabulary or conjugations to create flashcards."}
           </p>
         </div>
       </div>
