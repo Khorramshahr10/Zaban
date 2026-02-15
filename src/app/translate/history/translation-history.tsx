@@ -135,11 +135,8 @@ export function TranslationHistory() {
   const handleMerge = async () => {
     if (selectedIds.size < 2) return;
     setMerging(true);
-    // Preserve the table order (items are sorted by createdAt desc, so reverse for chronological)
-    const orderedIds = items
-      .filter((i) => selectedIds.has(i.id))
-      .reverse()
-      .map((i) => i.id);
+    // Use selection order — the order the user clicked determines sentence order
+    const orderedIds = Array.from(selectedIds);
     try {
       const res = await fetch("/api/translations/merge", {
         method: "POST",
