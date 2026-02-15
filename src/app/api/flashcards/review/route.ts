@@ -3,6 +3,8 @@ import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { sm2 } from "@/lib/srs/sm2";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { flashcardId, quality } = body as {

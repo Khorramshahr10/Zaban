@@ -6,6 +6,8 @@ import { seedDefaults } from "@/lib/db/seed";
 import { db, schema } from "@/lib/db";
 import { eq } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   seedDefaults();
 
