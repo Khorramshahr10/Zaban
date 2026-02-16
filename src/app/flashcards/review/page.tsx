@@ -29,7 +29,7 @@ interface SessionStats {
 type ReviewMode = "all" | "vocab" | "conjugation" | "weakest";
 
 export default function ReviewPage() {
-  const { activeLanguage } = useLanguage();
+  const { activeLanguage, languageName } = useLanguage();
   const [cards, setCards] = useState<FlashcardData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -216,7 +216,7 @@ export default function ReviewPage() {
               <p className="text-sm text-muted-foreground uppercase tracking-wide">
                 {currentCard.cardType === "conjugation"
                   ? "Conjugate"
-                  : "Translate to Arabic"}
+                  : `Translate to ${languageName}`}
               </p>
               <p className="text-2xl font-medium">{currentCard.front}</p>
               <p className="text-sm text-muted-foreground mt-4">

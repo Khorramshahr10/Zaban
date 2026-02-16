@@ -391,6 +391,7 @@ function PrintTranslationCard({ item }: { item: TranslationItem }) {
 }
 
 function TranslationDetail({ item, onClose }: { item: TranslationItem; onClose: () => void }) {
+  const { languageName } = useLanguage();
   const breakdown = parseBreakdown(item.breakdown);
   const mistakes = parseMistakes(item.mistakes);
 
@@ -406,7 +407,7 @@ function TranslationDetail({ item, onClose }: { item: TranslationItem; onClose: 
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-sm text-muted-foreground mb-1">Arabic</p>
+          <p className="text-sm text-muted-foreground mb-1">{languageName}</p>
           <TargetText as="div" className="text-xl sm:text-3xl font-bold">
             {item.translation}
           </TargetText>

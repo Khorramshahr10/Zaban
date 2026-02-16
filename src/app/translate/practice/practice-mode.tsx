@@ -34,7 +34,7 @@ interface ScoringResult {
 }
 
 export function PracticeMode() {
-  const { activeLanguage } = useLanguage();
+  const { activeLanguage, languageName } = useLanguage();
   const [english, setEnglish] = useState("");
   const [attempt, setAttempt] = useState("");
   const [gender, setGender] = useState<string>("");
@@ -119,7 +119,7 @@ export function PracticeMode() {
     <div className="space-y-4 max-w-2xl">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Type an English sentence and your Arabic translation attempt. AI will
+          Type an English sentence and your {languageName} translation attempt. AI will
           score and correct it.
         </p>
         <Select value={gender} onValueChange={setGender}>
@@ -144,11 +144,11 @@ export function PracticeMode() {
           />
         </div>
         <div className="space-y-2">
-          <Label>Your Arabic translation</Label>
+          <Label>Your {languageName} translation</Label>
           <Textarea
             value={attempt}
             onChange={(e) => setAttempt(e.target.value)}
-            placeholder="Type your Arabic attempt here..."
+            placeholder={`Type your ${languageName} attempt here...`}
             dir="rtl"
             rows={2}
             disabled={!!result}

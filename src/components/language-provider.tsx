@@ -10,6 +10,7 @@ import {
 
 interface LanguageContextValue {
   activeLanguage: string;
+  languageName: string;
   setActiveLanguage: (code: string) => void;
   languages: { code: string; name: string }[];
   loading: boolean;
@@ -17,6 +18,7 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue>({
   activeLanguage: "ar",
+  languageName: "Arabic",
   setActiveLanguage: () => {},
   languages: [],
   loading: true,
@@ -52,10 +54,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const languageName =
+    availableLanguages
+      .find((l) => l.code === activeLanguage)
+      ?.name.split(" (")[0] ?? activeLanguage;
+
   return (
     <LanguageContext.Provider
       value={{
         activeLanguage,
+        languageName,
         setActiveLanguage,
         languages: availableLanguages,
         loading,

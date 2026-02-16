@@ -74,7 +74,7 @@ const PROVIDER_CONFIG: Record<
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const { activeLanguage, setActiveLanguage } = useLanguage();
+  const { activeLanguage, setActiveLanguage, languages } = useLanguage();
   const langConfig = getLanguageConfig(activeLanguage);
   const langLabels = langConfig.vocabColumns;
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -231,8 +231,11 @@ export default function SettingsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ar">Arabic (MSA)</SelectItem>
-                <SelectItem value="fa">Farsi (Persian)</SelectItem>
+                {languages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

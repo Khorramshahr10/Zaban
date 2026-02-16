@@ -25,7 +25,7 @@ interface TranslationResult {
 }
 
 export function ReferenceMode() {
-  const { activeLanguage } = useLanguage();
+  const { activeLanguage, languageName } = useLanguage();
   const [text, setText] = useState("");
   const [gender, setGender] = useState<string>("");
   const [result, setResult] = useState<TranslationResult | null>(null);
@@ -91,7 +91,7 @@ export function ReferenceMode() {
     <div className="space-y-4 max-w-2xl">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Enter English text to get an Arabic translation.
+          Enter English text to get a {languageName} translation.
         </p>
         <Select value={gender} onValueChange={setGender}>
           <SelectTrigger className="w-[140px]">
@@ -135,7 +135,7 @@ export function ReferenceMode() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Arabic</p>
+              <p className="text-sm text-muted-foreground mb-1">{languageName}</p>
               <TargetText as="div" className="text-xl sm:text-3xl font-bold">
                 {result.translation}
               </TargetText>
